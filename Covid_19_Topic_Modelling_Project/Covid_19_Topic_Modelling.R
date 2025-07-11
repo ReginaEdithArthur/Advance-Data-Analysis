@@ -1,5 +1,5 @@
 #Set working directory
-setwd("C:/Users/LENOVO/Desktop/Advance Data Analysis Exam/Covid_19_Topic_Modelling_Project")
+setwd("....")
 
 # Install required packages (if not already installed)
 install.packages(c("tidyverse", "tm", "textstem", "tidytext", "wordcloud", "ggplot2"))
