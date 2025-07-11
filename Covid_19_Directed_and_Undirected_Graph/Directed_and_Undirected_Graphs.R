@@ -1,0 +1,85 @@
+#Set working directory
+setwd("C:/Users/LENOVO/Desktop/Advance Data Analysis Exam/Covid_19_Directed_and_Undirected_Graph")
+
+#Install Packages
+install.packages("dplyr")
+install.packages("corrplot")
+install.packages("bnlearn")
+install.packages("igraph")
+
+
+# Load necessary libraries
+library(dplyr)
+
+# Read the data
+covid_data <- read.csv("Covid_19_dataset.csv")
+
+# Quick view
+head(covid_data)
+
+# Check missing values
+colSums(is.na(covid_data))
+
+# Select important variables
+selected_data <- covid_data %>%
+  select(Country, Confirmed, Recovered, Deaths)
+
+# Remove rows with NA in selected columns
+selected_data <- na.omit(selected_data)
+
+# Check the cleaned data
+summary(selected_data)
+
+# Load EDA libraries
+library(corrplot)
+
+# Select numeric columns only
+numeric_data <- selected_data %>%
+  select(Confirmed, Recovered, Deaths)
+
+# Calculate correlation matrix
+cor_matrix <- cor(numeric_data)
+
+# Plot correlation matrix
+corrplot(cor_matrix, method = "color", addCoef.col = "black", 
+         tl.cex = 0.8, number.cex = 0.7, title = "COVID-19 Correlation Matrix",
+         mar = c(0,0,1,0))
+
+
+#Directed Graphical Model (Bayesian Network)
+install.packages("bnlearn") 
+library(bnlearn)
+
+# Convert all columns to numeric
+numeric_data_fixed <- as.data.frame(lapply(numeric_data, as.numeric))
+
+# Now try again
+bn_structure <- hc(numeric_data_fixed)
+
+
+# Basic plot
+plot(bn_structure)
+
+bn_fitted <- bn.fit(bn_structure, data = numeric_data_fixed)
+cpquery(bn_fitted, event = (Deaths > 1000), evidence = (Confirmed > 50000))
+
+
+
+#Undirected Graphical Model (Markov Random Field)
+install.packages("igraph") 
+library(igraph)
+
+# Moralize the Bayesian Network to get an Undirected Graph
+undirected_mrf <- moral(bn_structure)
+
+# Convert bnlearn network to igraph
+undirected_graph <- as.igraph(undirected_mrf)
+
+# Plot using igraph
+plot(undirected_graph,
+     vertex.color = "lightblue",
+     vertex.size = 30,
+     vertex.label.cex = 1.2,
+     edge.arrow.size = 0.5,
+     main = "Markov Random Field (Undirected Graph)")
+
